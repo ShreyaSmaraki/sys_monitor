@@ -1,0 +1,10 @@
+# Ignore C++ binaries
+app/monitor
+
+# Ignore Kernel Module binaries
+module/*.o
+module/*.ko
+module/*.mod*
+module/.*.cmd
+module/modules.order
+module/Module.symvers

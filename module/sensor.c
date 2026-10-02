@@ -1,15 +1,21 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
+#include <linux/jiffies.h>
 
 #define DEVICE_NAME "dummy_sensor"
 static int major_num;
 
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset) {
-    char msg[] = "Temperature: 45C\n";
-    int msg_len = sizeof(msg);
+    char msg[32];
+    int msg_len;
     
-    if (*offset >= msg_len) return 0; // EOF
+    // Generate a fluctuating temperature between 40C and 49C
+    int temp = 40 + (jiffies % 10);
+    snprintf(msg, sizeof(msg), "Temperature: %dC\n", temp);
+    msg_len = strlen(msg);
+    
+    if (*offset >= msg_len) return 0; 
     if (len > msg_len - *offset) len = msg_len - *offset;
     
     if (copy_to_user(buffer, msg + *offset, len) != 0) return -EFAULT;
@@ -33,4 +39,3 @@ static void __exit sensor_exit(void) {
 module_init(sensor_init);
 module_exit(sensor_exit);
 MODULE_LICENSE("GPL");
-
